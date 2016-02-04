@@ -1,0 +1,119 @@
+### Bien. On commence par créer un jeu de données propre avec a minima 75% des sites couverts dans chacun des trois groupes principaux: suisse, allemagne, finlande
+################# IN R
+German<-read.table("German.frq.count",h=T)
+Swiss<-read.table("Swiss.frq.count",h=T)
+FS31<-read.table("FS31.frq.count",h=T)   
+LA10<-read.table("LA10.frq.count",h=T)  
+LON1<-read.table("LON1.frq.count",h=T) 
+SK1<-read.table("SK1.frq.count",h=T)  
+SKW1<-read.table("SKW1.frq.count",h=T) 
+FUN13<-read.table("FUN13.frq.count",h=T)
+HA1<-read.table("HA1.frq.count",h=T)   
+LA18<-read.table("LA18.frq.count",h=T) 
+N86<-read.table("N86.frq.count",h=T)  
+SK45<-read.table("SK45.frq.count",h=T) 
+SKW2<-read.table("SKW2.frq.count",h=T)
+Allele_count<-cbind(German[,c(6,8)],Swiss[,c(6,8)],FS31[,c(6,8)],LA10[,c(6,8)],LON1[,c(6,8)],SK1[,c(6,8)],SKW1[,c(6,8)],FUN13[,c(6,8)],HA1[,c(6,8)],LA18[,c(6,8)],N86[,c(6,8)],SK45[,c(6,8)],SKW2[,c(6,8)])
+
+#Ordre des populations:
+#German,Swiss,FS31,LA10,LON1,SK1,SKW1,FUN13,HA1,LA18,N86,SK45,SKW2
+
+Allele_count$total<-rowSums(Allele_count[,1:26])
+#Allele_count$freq<-rowSums(Allele_count[,seq(1,26,by=2)])/Allele_count$total
+truc<-cbind(German[,c(1,2)],Allele_count)
+truc2<-subset(truc, truc$total> 150 & truc[,3]+truc[,4]> 30 & truc[,5]+truc[,6] > 30 & truc$total-truc[,3]-truc[,4]-truc[,5]-truc[,6]>85)
+#truc$freq<0.99 & truc$freq>0.01 &
+Allele_count<-truc2[,3:28]
+
+write.table(Allele_count, file="Allele_counts_Daphnia_8000SNPs.out",row.names = F, col.names=F)
+write.table(truc2[,c(1,2)],file="marker_positions_8000.out",row.names = F, col.names=F)
+########### Shell scripts
+cat Allele_counts_Daphnia_8000SNPs.out count_1036 > Allele_counts_Daphnia_8000SNPs.out2
+mv Allele_counts_Daphnia_8000SNPs.out2 Allele_counts_Daphnia_8000SNPs.out
+cat marker_positions_8000.out pos1036 > marker_positions.out2
+mv marker_positions.out2 marker_positions_8000.out
+ 
+./g_baypass -npop 13 -gfile Allele_counts_Daphnia_8000SNPs.out -efile traits.txt -scalecov -nthreads 16 -outprefix Daphnia2
+
+
+
+###On obtient une jolie matrice populationnelle cohérente avec l'ACP. On fait maintenant retourner le modèle en fixant les paramètres déterminés par le run sur ce jeu de données
+################# IN R
+German<-read.table("German.frq.count",h=T)
+Swiss<-read.table("Swiss.frq.count",h=T)
+FS31<-read.table("FS31.frq.count",h=T)   
+LA10<-read.table("LA10.frq.count",h=T)  
+LON1<-read.table("LON1.frq.count",h=T) 
+SK1<-read.table("SK1.frq.count",h=T)  
+SKW1<-read.table("SKW1.frq.count",h=T) 
+FUN13<-read.table("FUN13.frq.count",h=T)
+HA1<-read.table("HA1.frq.count",h=T)   
+LA18<-read.table("LA18.frq.count",h=T) 
+N86<-read.table("N86.frq.count",h=T)  
+SK45<-read.table("SK45.frq.count",h=T) 
+SKW2<-read.table("SKW2.frq.count",h=T)
+Allele_count<-cbind(German[,c(6,8)],Swiss[,c(6,8)],FS31[,c(6,8)],LA10[,c(6,8)],LON1[,c(6,8)],SK1[,c(6,8)],SKW1[,c(6,8)],FUN13[,c(6,8)],HA1[,c(6,8)],LA18[,c(6,8)],N86[,c(6,8)],SK45[,c(6,8)],SKW2[,c(6,8)])
+
+#Ordre des populations:
+#German,Swiss,FS31,LA10,LON1,SK1,SKW1,FUN13,HA1,LA18,N86,SK45,SKW2
+
+Allele_count$total<-rowSums(Allele_count[,1:26])
+#Allele_count$freq<-rowSums(Allele_count[,seq(1,26,by=2)])/Allele_count$total
+truc<-cbind(German[,c(1,2)],Allele_count)
+truc2<-subset(truc, truc[,5]+truc[,6] > 30 & truc$total-truc[,3]-truc[,4]-truc[,5]-truc[,6]>85)
+#truc$freq<0.99 & truc$freq>0.01 &
+Allele_count<-truc2[,3:28]
+
+write.table(Allele_count, file="Allele_counts_Daphnia_missinggerman.out",row.names = F, col.names=F)
+write.table(truc2[,c(1,2)],file="marker_positions_missinggerman.out",row.names = F, col.names=F)
+
+cat Allele_counts_Daphnia_missinggerman.out count_1036 > Allele_counts_Daphnia_missinggerman.out2
+mv Allele_counts_Daphnia_missinggerman.out2 Allele_counts_Daphnia_missinggerman.out
+cat marker_positions_missinggerman.out pos1036 > marker_positionsmissinggerman.out2
+mv marker_positionsmissinggerman.out2 marker_positions_missinggerman.out
+
+
+#Beta parameters from first run
+ PARAM Mean SD
+a_beta_pi      6.774691     0.508643
+b_beta_pi      0.801587     0.059690
+
+./g_baypass -npop 13 -gfile Allele_counts_Daphnia_missinggerman.out -omegafile Daphnia2_mat_omega.out -setpibetapar -betapiprior 6.774691 0.801587 -efile traits.txt -scalecov -nthreads 16 -outprefix Daphnia3
+
+
+################# IN R
+
+
+require(corrplot) ; require(ape)
+#source the baypass R functions (check PATH)
+source("baypass_2.1/utils/baypass_utils.R")
+#upload estimate of omega
+omega=as.matrix(read.table("Daphnia2_mat_omega.out"))
+pop.names=c("German","Swiss","FS31","LA10","LON1","SK1","SKW1","FUN13","HA1","LA18","N86","SK45","SKW2")
+
+dimnames(omega)=list(pop.names,pop.names)
+#Compute and visualize the correlation matrix
+cor.mat=cov2cor(omega)
+corrplot(cor.mat,method="color",mar=c(2,1,2,2)+0.1,
+main=expression("Correlation map based on"~hat(Omega)))
+#Visualize the correlation matrix as hierarchical clustering tree
+bta14.tree=as.phylo(hclust(as.dist(1-cor.mat**2)))
+plot(bta14.tree,type="p",
+main=expression("Hier. clust. tree based on"~hat(Omega)~"("*d[ij]*"=1-"*rho[ij]*")"))
+
+## Calibration of XtX statistics
+#get estimates (post. mean) of both the a_pi and b_pi parameters of
+#the Pi Beta distribution
+pi.beta.coef=read.table("Daphnia2_summary_beta_params.out",h=T)$Mean
+omega=as.matrix(read.table("Daphnia2_mat_omega.out"))
+#upload the original data to obtain total allele count
+daphnia.data<-geno2YN("Allele_counts_Daphnia_8000SNPs.out")
+#Create the POD
+simu.bta<-simulate.baypass(omega.mat=omega,nsnp=100000,sample.size=daphnia.data$NN,beta.pi=pi.beta.coef,pi.maf=0,suffix="Daphnia_8000SNPs")
+###It seems OK to put pi.maf=0 even for datasets with MAF>0.01... Anyway no more filter on allele frequencies.
+
+###Out of R:
+
+##More conservative: analyzing the POD as if the dataset was obtained from the "pure" dataset (no matrix or parameters given). Calibration also performed for BFis
+
+./g_baypass -npop 13 -gfile G.Daphnia_8000SNPs -efile traits.txt -scalecov -nthreads 16 -outprefix anapod_8000
